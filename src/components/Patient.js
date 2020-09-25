@@ -5,17 +5,16 @@ import {Table} from 'react-bootstrap';
 
 import {Button, ButtonToolbar} from 'react-bootstrap';
 import {AddPatientModal} from './AddPatientModal';
+import {EditPatientModal} from  './EditPatientModal';
 
 export class Patient extends Component{
 
     constructor(props){
         super();
-        this.state={patient:[], addModalShow :false}
+        this.state={patient:[], addModalShow :false, editModalShow : false}
     }
 
-    componentDidMount(){
-        this.refreshList();
-    }
+  
     
     refreshList(){
             fetch('https://localhost:44372/api/PatientView/getallpatients')
@@ -28,14 +27,36 @@ export class Patient extends Component{
     
     }
 
+    componentDidMount(){
+        this.refreshList();
+    }
+  
+
+    deletePatient(patientid)
+    {
+        if(window.confirm('Are you sure?'))
+        {
+            fetch('https://localhost:44372/api​/PatientView​/deletepatient/'+patientid,{
+            method:'DELETE',
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+             }
+
+            })
+
+
+        }
+    }
 
       
 
 
     render(){
      
-        const{patient}= this.state;
+        const{patient, patientid, patientname, patientgender, patientemail, patientusername}= this.state;
         let addModalClose =() => this.setState({addModalShow: false });
+        let editModalClose =() => this.setState({editModalShow: false });
 
         return(
         
@@ -55,6 +76,7 @@ export class Patient extends Component{
                     <th>Occupation</th>
                     <th>City</th>
                     <th>State</th>
+                    <th>Option</th>
               </tr> 
             </thead> 
             <tbody>
@@ -70,6 +92,43 @@ export class Patient extends Component{
                     <td>{p.occupationdetails}</td>
                     <td>{p.city}</td>
                     <td>{p.state}</td>
+                    <td>
+
+                        <ButtonToolbar>
+                            <Button
+                            className="mr-2" variant="info"
+                            onClick={()=> this.setState({editModalShow:true, patientid:p.id, patientname:p.name, patientgender:p.gender,
+                                                          
+                                                          patientemail:p.email, patientusername:p.username,
+                                                            })}
+                            >
+                                Edit
+                            </Button>
+
+                            <EditPatientModal
+                            show = {this.state.editModalShow}
+                            onHide={editModalClose}
+                            patientid = {p.id}
+                            patientname= {patientname}
+                            patientgender= {patientgender}
+                            patientemail = {patientemail}
+                            patientusername = {patientusername}
+                           
+                            />
+
+                            <Button className="mr-2"
+                            onClick= {()=> this.deletePatient(p.id)}
+                            variant="danger">
+                                Delete
+
+                            </Button>
+
+
+
+
+
+                        </ButtonToolbar>
+                    </td>
                     </tr>
                     )}
             </tbody>
